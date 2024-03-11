@@ -1,0 +1,35 @@
+package com.emi.onlineshop.controllers;
+
+import com.emi.onlineshop.dtos.InventoryResponse;
+import com.emi.onlineshop.models.Inventory;
+import com.emi.onlineshop.services.InventoryService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/inventory")
+@PreAuthorize("hasAuthority('USER')")
+public class InventoryController {
+
+    private final InventoryService inventoryService;
+
+    public InventoryController(InventoryService inventoryService) {
+        this.inventoryService = inventoryService;
+    }
+
+    @GetMapping
+    public List<InventoryResponse> findAll() {
+        return inventoryService.findAll();
+    }
+
+    @GetMapping("/{code}")
+    public InventoryResponse findByCode(@PathVariable String code) {
+        return inventoryService.findByCode(code);
+    }
+
+}
