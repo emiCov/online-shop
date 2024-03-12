@@ -46,11 +46,7 @@ public class OrderService {
         order.setUser(user);
         order.setTotal(calculateTotal(cartItems));
         order.setOrderStatus(OrderStatus.PENDING);
-
-        List<OrderDetail> orderDetails = cartItems.stream()
-                .map(cartItem -> mapOrderDetail(cartItem, order))
-                .toList();
-        order.setOrderDetails(orderDetails);
+        cartItems.forEach(cartItem -> order.addOrderDetail(getOrderDetail(cartItem)));
 
         Order savedOrder = orderRepository.save(order);
         cartItemRepository.deleteAll(cartItems);
@@ -94,9 +90,8 @@ public class OrderService {
         );
     }
 
-    private OrderDetail mapOrderDetail(CartItem cartItem, Order order) {
+    private OrderDetail getOrderDetail(CartItem cartItem) {
         OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setOrder(order);
         orderDetail.setProduct(cartItem.getProduct());
         orderDetail.setQuantity(cartItem.getQuantity());
         orderDetail.setSubtotal(cartItem.getSubtotal());

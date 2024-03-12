@@ -3,6 +3,7 @@ package com.emi.onlineshop.models;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,8 +25,8 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
-    private List<OrderDetail> orderDetails;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<OrderDetail> orderDetails = new ArrayList<>();
 
     public long getId() {
         return id;
@@ -73,5 +74,15 @@ public class Order {
 
     public void setOrderDetails(List<OrderDetail> orderDetails) {
         this.orderDetails = orderDetails;
+    }
+
+    public void addOrderDetail(OrderDetail orderDetail) {
+        orderDetails.add(orderDetail);
+        orderDetail.setOrder(this);
+    }
+
+    public void removeOrderDetail(OrderDetail orderDetail) {
+        orderDetails.remove(orderDetail);
+        orderDetail.setOrder(null);
     }
 }
