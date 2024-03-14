@@ -36,16 +36,6 @@ public class ProductController {
         return productService.getAllByFilter(filter);
     }
 
-//    @GetMapping("/better/{pageNo}")
-//    public List<ProductResponse> getAllProductsBetterByPage(
-//            @PathVariable int pageNo,
-//            @RequestParam(defaultValue = PRODUCTS_PER_PAGE) int pageSize,
-//            @RequestParam(defaultValue = "name") String sortField,
-//            @RequestParam(defaultValue = "asc") String sortDir
-//    ) {
-//        return productService.getAllProductsBetterByPage(pageNo, pageSize, sortField, sortDir);
-//    }
-
     @GetMapping("/page/{pageNo}")
     public List<ProductResponse> getAllProductsByPage(
             @PathVariable int pageNo,

@@ -8,11 +8,12 @@ import com.emi.onlineshop.repositories.ProductRepository;
 import com.emi.onlineshop.utils.Filter;
 import com.emi.onlineshop.utils.Mapper;
 import com.emi.onlineshop.utils.Utils;
-import jakarta.transaction.Transactional;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -71,15 +72,6 @@ public class ProductService {
                 .map(mapper::mapProductResponse)
                 .toList();
     }
-
-    //    public List<ProductResponse> getAllProductsBetterByPage(int pageNo, int pageSize, String sortField, String sortDir) {
-//        Sort sort = Sort.by(sortField);
-//        sort = sortDir.equals("asc") ? sort.ascending() : sort.descending();
-//
-//        pageNo = Math.max(pageNo, 1);
-//        PageRequest pageRequest = PageRequest.of(pageNo - 1, pageSize, sort);
-//        return null;
-//    }
 
     private Specification<Product> getSpecificationFromFilters(List<Filter> filters) {
         Specification<Product> specification = createSpecification(filters.remove(0));
