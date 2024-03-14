@@ -5,10 +5,7 @@ import com.emi.onlineshop.dtos.OrderResponse;
 import com.emi.onlineshop.models.*;
 import com.emi.onlineshop.repositories.CartItemRepository;
 import com.emi.onlineshop.repositories.OrderRepository;
-import com.emi.onlineshop.repositories.UserRepository;
-import com.emi.onlineshop.security.SecurityUser;
 import com.emi.onlineshop.utils.Mapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,18 +15,18 @@ import java.util.stream.Collectors;
 @Service
 public class OrderService {
 
+    private final AuthenticationService authenticationService;
     private final OrderRepository orderRepository;
     private final CartItemService cartItemService;
-    private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final Mapper mapper;
     private final InventoryService inventoryService;
 
-    public OrderService(OrderRepository orderRepository, CartItemService cartItemService, UserRepository userRepository,
+    public OrderService(AuthenticationService authenticationService, OrderRepository orderRepository, CartItemService cartItemService,
                         CartItemRepository cartItemRepository, Mapper mapper, InventoryService inventoryService) {
+        this.authenticationService = authenticationService;
         this.orderRepository = orderRepository;
         this.cartItemService = cartItemService;
-        this.userRepository = userRepository;
         this.cartItemRepository = cartItemRepository;
         this.mapper = mapper;
         this.inventoryService = inventoryService;
@@ -37,9 +34,7 @@ public class OrderService {
 
     @Transactional
     public String createOrder() {
-        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findUserByEmail(principal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("No user found"));
+        User user = authenticationService.getAuthenticatedUser();
 
         List<CartItem> cartItems = cartItemService.getCartForUser();
         if (cartItems.isEmpty()) {
@@ -68,9 +63,7 @@ public class OrderService {
     }
 
     public List<OrderResponse> findOrdersByUserId() {
-        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return orderRepository.findByUser_Email(principal.getUsername())
+        return orderRepository.findByUser_Email(authenticationService.getAuthenticatedUser().getEmail())
                 .stream()
                 .map(this::mapToOrderResponse)
                 .toList();

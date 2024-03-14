@@ -9,6 +9,7 @@ import com.emi.onlineshop.models.User;
 import com.emi.onlineshop.repositories.RoleRepository;
 import com.emi.onlineshop.repositories.UserRepository;
 import com.emi.onlineshop.security.SecurityUser;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -71,6 +72,13 @@ public class AuthenticationService {
         String token = jwtService.generateToken(new SecurityUser(user));
 
         return new AuthenticationResponse(token);
+    }
+
+    @PreAuthorize("isAuthenticated")
+    public User getAuthenticatedUser() {
+        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRepository.findUserByEmail(principal.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("No user found"));
     }
 
 }

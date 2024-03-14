@@ -2,17 +2,12 @@ package com.emi.onlineshop.services;
 
 import com.emi.onlineshop.dtos.CartItemResponse;
 import com.emi.onlineshop.models.CartItem;
-import com.emi.onlineshop.models.Inventory;
 import com.emi.onlineshop.models.Product;
 import com.emi.onlineshop.models.User;
 import com.emi.onlineshop.repositories.CartItemRepository;
-import com.emi.onlineshop.repositories.InventoryRepository;
 import com.emi.onlineshop.repositories.ProductRepository;
-import com.emi.onlineshop.repositories.UserRepository;
-import com.emi.onlineshop.security.SecurityUser;
 import com.emi.onlineshop.utils.Mapper;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,16 +16,17 @@ import java.util.List;
 @Transactional
 public class CartItemService {
 
-    private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
     private final ProductRepository productRepository;
-    private final InventoryRepository inventoryRepository;
+    private final InventoryService inventoryService;
     private final CartItemRepository cartItemRepository;
     private final Mapper mapper;
 
-    public CartItemService(UserRepository userRepository, ProductRepository productRepository, InventoryRepository inventoryRepository, CartItemRepository cartItemRepository, Mapper mapper) {
-        this.userRepository = userRepository;
+    public CartItemService(AuthenticationService authenticationService, ProductRepository productRepository,
+                           InventoryService inventoryService, CartItemRepository cartItemRepository, Mapper mapper) {
+        this.authenticationService = authenticationService;
         this.productRepository = productRepository;
-        this.inventoryRepository = inventoryRepository;
+        this.inventoryService = inventoryService;
         this.cartItemRepository = cartItemRepository;
         this.mapper = mapper;
     }
@@ -39,19 +35,12 @@ public class CartItemService {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than zero!");
         }
-
-        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        User user = userRepository.findUserByEmail(principal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("No user found"));
+        User user = authenticationService.getAuthenticatedUser();
 
         Product product = productRepository.findByCode(productCode)
                 .orElseThrow(() -> new IllegalArgumentException("No product found"));
 
-        Inventory productInventory = inventoryRepository.findByCode(productCode)
-                .orElseThrow(() -> new IllegalArgumentException("No product found in inventory"));
-
-        if (productInventory.getQuantity() < quantity) {
+        if (!inventoryService.isEnoughStockForProduct(productCode, quantity)) {
             throw new IllegalArgumentException("Not enough stock");
         }
 
@@ -73,9 +62,8 @@ public class CartItemService {
 
     @Transactional
     public String deleteProductFromCart(String productCode) {
-        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        long removedProducts = cartItemRepository.deleteByUser_EmailAndProduct_Code(principal.getUsername(), productCode);
+        long removedProducts = cartItemRepository.deleteByUser_EmailAndProduct_Code(
+                authenticationService.getAuthenticatedUser().getEmail(), productCode);
 
         return removedProducts > 0 ?
                 "The product has been removed from the shopping cart." :
@@ -90,14 +78,11 @@ public class CartItemService {
     }
 
     public List<CartItem> getCartForUser() {
-        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return cartItemRepository.findByUser_Email(principal.getUsername());
+        return cartItemRepository.findByUser_Email(authenticationService.getAuthenticatedUser().getEmail());
     }
 
     public String deleteCartForUser() {
-        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        List<CartItem> cartItems = cartItemRepository.findByUser_Email(principal.getUsername());
+        List<CartItem> cartItems = cartItemRepository.findByUser_Email(authenticationService.getAuthenticatedUser().getEmail());
 
         if (cartItems.isEmpty()) {
             return "The cart is already empty";
