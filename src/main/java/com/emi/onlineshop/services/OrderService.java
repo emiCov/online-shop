@@ -1,6 +1,5 @@
 package com.emi.onlineshop.services;
 
-import com.emi.onlineshop.dtos.CartItemResponse;
 import com.emi.onlineshop.dtos.OrderDetailsResponse;
 import com.emi.onlineshop.dtos.OrderResponse;
 import com.emi.onlineshop.models.*;
@@ -11,6 +10,7 @@ import com.emi.onlineshop.security.SecurityUser;
 import com.emi.onlineshop.utils.Mapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,15 +23,19 @@ public class OrderService {
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final Mapper mapper;
+    private final InventoryService inventoryService;
 
-    public OrderService(OrderRepository orderRepository, CartItemService cartItemService, UserRepository userRepository, CartItemRepository cartItemRepository, Mapper mapper) {
+    public OrderService(OrderRepository orderRepository, CartItemService cartItemService, UserRepository userRepository,
+                        CartItemRepository cartItemRepository, Mapper mapper, InventoryService inventoryService) {
         this.orderRepository = orderRepository;
         this.cartItemService = cartItemService;
         this.userRepository = userRepository;
         this.cartItemRepository = cartItemRepository;
         this.mapper = mapper;
+        this.inventoryService = inventoryService;
     }
 
+    @Transactional
     public String createOrder() {
         SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findUserByEmail(principal.getUsername())
@@ -54,10 +58,13 @@ public class OrderService {
         return "Order with id " + savedOrder.getId() + " placed.";
     }
 
-
     public String deleteOrderById(long id) {
-        orderRepository.deleteById(id);
-        return "done";
+        if (orderRepository.existsById(id)) {
+            orderRepository.deleteById(id);
+            return "done";
+        }
+
+        return "Can not find order with id: " + id;
     }
 
     public List<OrderResponse> findOrdersByUserId() {
@@ -96,6 +103,10 @@ public class OrderService {
         orderDetail.setQuantity(cartItem.getQuantity());
         orderDetail.setSubtotal(cartItem.getSubtotal());
         orderDetail.setUnitPrice(cartItem.getProduct().getPrice());
+
+        if (!inventoryService.isStockForProductSuccessfullyModified(cartItem.getProduct().getCode(), cartItem.getQuantity())) {
+            throw new IllegalArgumentException("There aren't enough products: " + cartItem.getProduct().getCode());
+        }
 
         return orderDetail;
     }
