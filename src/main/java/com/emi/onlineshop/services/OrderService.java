@@ -3,7 +3,6 @@ package com.emi.onlineshop.services;
 import com.emi.onlineshop.dtos.OrderDetailsResponse;
 import com.emi.onlineshop.dtos.OrderResponse;
 import com.emi.onlineshop.models.*;
-import com.emi.onlineshop.repositories.CartItemRepository;
 import com.emi.onlineshop.repositories.OrderRepository;
 import com.emi.onlineshop.utils.Mapper;
 import org.springframework.stereotype.Service;
@@ -18,27 +17,25 @@ public class OrderService {
     private final AuthenticationService authenticationService;
     private final OrderRepository orderRepository;
     private final CartItemService cartItemService;
-    private final CartItemRepository cartItemRepository;
     private final Mapper mapper;
     private final InventoryService inventoryService;
 
     public OrderService(AuthenticationService authenticationService, OrderRepository orderRepository, CartItemService cartItemService,
-                        CartItemRepository cartItemRepository, Mapper mapper, InventoryService inventoryService) {
+                        Mapper mapper, InventoryService inventoryService) {
         this.authenticationService = authenticationService;
         this.orderRepository = orderRepository;
         this.cartItemService = cartItemService;
-        this.cartItemRepository = cartItemRepository;
         this.mapper = mapper;
         this.inventoryService = inventoryService;
     }
 
     @Transactional
-    public String createOrder() {
+    public Order createOrder() {
         User user = authenticationService.getAuthenticatedUser();
 
         List<CartItem> cartItems = cartItemService.getCartForUser();
         if (cartItems.isEmpty()) {
-            return "Cart is empty.";
+            throw new IllegalArgumentException("The cart is empty. Can not create any order");
         }
 
         Order order = new Order();
@@ -47,10 +44,7 @@ public class OrderService {
         order.setOrderStatus(OrderStatus.PENDING);
         cartItems.forEach(cartItem -> order.addOrderDetail(getOrderDetail(cartItem)));
 
-        Order savedOrder = orderRepository.save(order);
-        cartItemRepository.deleteAll(cartItems);
-
-        return "Order with id " + savedOrder.getId() + " placed.";
+        return orderRepository.save(order);
     }
 
     public String deleteOrderById(long id) {
@@ -97,9 +91,7 @@ public class OrderService {
         orderDetail.setSubtotal(cartItem.getSubtotal());
         orderDetail.setUnitPrice(cartItem.getProduct().getPrice());
 
-        if (!inventoryService.isStockForProductSuccessfullyModified(cartItem.getProduct().getCode(), cartItem.getQuantity())) {
-            throw new IllegalArgumentException("There aren't enough products: " + cartItem.getProduct().getCode());
-        }
+        inventoryService.removeQuantityForProduct(cartItem.getProduct().getCode(), cartItem.getQuantity());
 
         return orderDetail;
     }

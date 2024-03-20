@@ -23,11 +23,6 @@ public class OrderController {
         return orderService.findOrdersByUserId();
     }
 
-    @PostMapping
-    public String createOrder() {
-        return orderService.createOrder();
-    }
-
     @DeleteMapping("/{id}")
     public String deleteOrderById(@PathVariable long id) {
         return orderService.deleteOrderById(id);

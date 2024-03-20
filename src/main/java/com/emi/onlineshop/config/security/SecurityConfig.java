@@ -40,7 +40,7 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-//    /* with BASIC and API-KEY
+    /* with BASIC and API-KEY
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,9 +58,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    */
+    */
 
-     /* with JWT
+//     /* with JWT
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -80,7 +80,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-      */
+//      */
 
     @Bean
     public PasswordEncoder passwordEncoder() {

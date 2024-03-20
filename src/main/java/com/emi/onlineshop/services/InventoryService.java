@@ -5,7 +5,6 @@ import com.emi.onlineshop.models.Inventory;
 import com.emi.onlineshop.repositories.InventoryRepository;
 import com.emi.onlineshop.utils.Mapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -21,7 +20,6 @@ public class InventoryService {
         this.mapper = mapper;
     }
 
-
     public List<InventoryResponse> findAll() {
         return inventoryRepository.findAll()
                 .stream()
@@ -36,25 +34,36 @@ public class InventoryService {
     }
 
     public boolean isEnoughStockForProduct(String productCode, short quantity) {
-        Inventory productInventory = inventoryRepository.findByCode(productCode)
-                .orElseThrow(() -> new IllegalArgumentException("No product found in inventory"));
+        Inventory productInventory = getInventoryForProduct(productCode);
 
         return productInventory.getQuantity() > quantity;
     }
 
     @Transactional
-    public boolean isStockForProductSuccessfullyModified(String productCode, short quantity) {
-        Inventory productInventory = inventoryRepository.findByCode(productCode)
-                .orElseThrow(() -> new IllegalArgumentException("No product found in inventory"));
-
+    public void removeQuantityForProduct(String productCode, long quantity) {
+        Inventory productInventory = getInventoryForProduct(productCode);
         if (productInventory.getQuantity() < quantity) {
-            return false;
+            throw new IllegalArgumentException("There aren't enough products for: " + productCode);
         }
 
-        long updatedQuantity = productInventory.getQuantity() - quantity;
-        productInventory.setQuantity(updatedQuantity);
+        updateQuantityForProduct(productInventory, -quantity);
+    }
 
-        inventoryRepository.save(productInventory);
-        return true;
+    @Transactional
+    public void addQuantityForProduct(String productCode, long quantity) {
+        Inventory productInventory = getInventoryForProduct(productCode);
+        updateQuantityForProduct(productInventory, quantity);
+    }
+
+    private void updateQuantityForProduct(Inventory inventory, long quantity) {
+        long updatedQuantity = inventory.getQuantity() + quantity;
+        inventory.setQuantity(updatedQuantity);
+
+        inventoryRepository.save(inventory);
+    }
+
+    private Inventory getInventoryForProduct(String productCode) {
+        return inventoryRepository.findByCode(productCode)
+                .orElseThrow(() -> new IllegalArgumentException("No product found in inventory"));
     }
 }
