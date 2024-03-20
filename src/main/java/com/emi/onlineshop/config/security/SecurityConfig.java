@@ -1,6 +1,7 @@
 package com.emi.onlineshop.config.security;
 
 import com.emi.onlineshop.config.security.filters.ApiKeyFilter;
+import com.emi.onlineshop.config.security.filters.CsrfCookieFilter;
 import com.emi.onlineshop.config.security.filters.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 
 @Configuration
 @EnableMethodSecurity
@@ -36,12 +40,15 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    /* with BASIC and API-KEY
+//    /* with BASIC and API-KEY
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                .csrf(csrf -> csrf.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .addFilterBefore(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults())
                 .addFilterBefore(new ApiKeyFilter(key), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> requests
@@ -51,9 +58,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-    */
+//    */
 
-//     /* with JWT
+     /* with JWT
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -73,7 +80,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-//      */
+      */
 
     @Bean
     public PasswordEncoder passwordEncoder() {
