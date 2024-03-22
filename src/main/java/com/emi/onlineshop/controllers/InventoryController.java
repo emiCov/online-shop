@@ -2,9 +2,7 @@ package com.emi.onlineshop.controllers;
 
 import com.emi.onlineshop.aspect.HasAuthorities;
 import com.emi.onlineshop.dtos.InventoryResponse;
-import com.emi.onlineshop.models.Inventory;
 import com.emi.onlineshop.services.InventoryService;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

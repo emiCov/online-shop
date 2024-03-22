@@ -3,7 +3,6 @@ package com.emi.onlineshop.controllers;
 import com.emi.onlineshop.aspect.HasAuthorities;
 import com.emi.onlineshop.dtos.OrderResponse;
 import com.emi.onlineshop.services.OrderService;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

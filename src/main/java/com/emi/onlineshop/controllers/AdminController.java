@@ -2,7 +2,6 @@ package com.emi.onlineshop.controllers;
 
 import com.emi.onlineshop.aspect.HasAuthorities;
 import com.emi.onlineshop.services.UserService;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
