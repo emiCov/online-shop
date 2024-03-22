@@ -1,5 +1,6 @@
 package com.emi.onlineshop.controllers;
 
+import com.emi.onlineshop.aspect.HasAuthorities;
 import com.emi.onlineshop.dtos.InventoryResponse;
 import com.emi.onlineshop.models.Inventory;
 import com.emi.onlineshop.services.InventoryService;
@@ -13,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/inventory")
-@PreAuthorize("hasAuthority('USER')")
 public class InventoryController {
 
     private final InventoryService inventoryService;
@@ -23,11 +23,13 @@ public class InventoryController {
     }
 
     @GetMapping
+    @HasAuthorities(roles = {"USER"})
     public List<InventoryResponse> findAll() {
         return inventoryService.findAll();
     }
 
     @GetMapping("/{code}")
+    @HasAuthorities(roles = {"USER"})
     public InventoryResponse findByCode(@PathVariable String code) {
         return inventoryService.findByCode(code);
     }
