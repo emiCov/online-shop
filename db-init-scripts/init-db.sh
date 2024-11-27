@@ -1,0 +1,2 @@
+psql -U $POSTGRES_USERNAME -tc "SELECT 1 FROM pg_database WHERE datname = 'shop'" | grep -q 1 | psql -U postgres -c "CREATE DATABASE shop;"
+psql -U $POSTGRES_USERNAME -tc "SELECT 1 FROM pg_database WHERE datname = 'keycloak'" | grep -q 1 | psql -U postgres -c "CREATE DATABASE keycloak;"

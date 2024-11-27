@@ -1,8 +1,8 @@
 package com.emi.onlineshop.controllers;
 
-import com.emi.onlineshop.aspect.HasAuthorities;
 import com.emi.onlineshop.dtos.InventoryResponse;
 import com.emi.onlineshop.services.InventoryService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +21,13 @@ public class InventoryController {
     }
 
     @GetMapping
-    @HasAuthorities(roles = {"USER"})
+    @PreAuthorize("hasAuthority('USER')")
     public List<InventoryResponse> findAll() {
         return inventoryService.findAll();
     }
 
     @GetMapping("/{code}")
-    @HasAuthorities(roles = {"USER"})
+    @PreAuthorize("hasAuthority('USER')")
     public InventoryResponse findByCode(@PathVariable String code) {
         return inventoryService.findByCode(code);
     }

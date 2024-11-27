@@ -1,9 +1,10 @@
 package com.emi.onlineshop.controllers;
 
 import com.emi.onlineshop.dtos.AuthenticationRequest;
-import com.emi.onlineshop.dtos.AuthenticationResponse;
+import com.emi.onlineshop.dtos.KeycloakJwtResponse;
 import com.emi.onlineshop.dtos.RegisterRequest;
-import com.emi.onlineshop.services.AuthenticationService;
+import com.emi.onlineshop.services.KeycloakService;
+import com.emi.onlineshop.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,19 +15,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
+    private final UserService userService;
+    private final KeycloakService keycloakService;
 
-    public AuthenticationController(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-        return  ResponseEntity.ok(authenticationService.register(request));
+    public AuthenticationController(UserService userService, KeycloakService keycloakService) {
+        this.userService = userService;
+        this.keycloakService = keycloakService;
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+    public ResponseEntity<KeycloakJwtResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(keycloakService.authenticateClient());
+    }
+
+    @PostMapping("/authenticate/user")
+    public ResponseEntity<KeycloakJwtResponse> authenticateUser(@RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(keycloakService.authenticateUser(request));
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<String> addUser(@RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(userService.addUser(registerRequest));
     }
 }

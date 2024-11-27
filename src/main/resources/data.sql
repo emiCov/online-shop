@@ -46,8 +46,8 @@ INSERT INTO roles (id, name)
 VALUES (nextval('roles_seq'), 'ADMIN'),
 		(nextval('roles_seq'), 'USER');
 
-INSERT INTO users (id, email, first_name, last_name, password)
-VALUES (nextval('users_seq'), 'adminEmail', 'Admin', 'Admin', '$2a$10$qBbKAklFkIgpdYkGzClmne1r9ko8vN20xVnvUg6uGrZ08WT2syIVW');
+INSERT INTO users (id, email, first_name, last_name)
+VALUES (nextval('users_seq'), 'adminEmail', 'Admin', 'Admin');
 
 INSERT INTO users_roles (role_id, user_id)
 VALUES (1,1);

@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS users
     email character varying(255),
     first_name character varying(255),
     last_name character varying(255),
-    password character varying(255),
+    keycloak_id character varying(255),
     CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 

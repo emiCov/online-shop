@@ -1,6 +1,5 @@
 package com.emi.onlineshop.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Set;
@@ -20,8 +19,8 @@ public class User {
 
     private String email;
 
-    @JsonIgnore
-    private String password;
+    @Column(name = "keycloak_id")
+    private String keycloakId;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
@@ -63,12 +62,12 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getKeycloakId() {
+        return keycloakId;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
     }
 
     public Set<Role> getRoles() {
